@@ -1,0 +1,34 @@
+name: Scratch
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version"
+        required: true
+
+jobs:
+  publish-egg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/*}
+      - run: |
+          cat > ./version << EOL
+          ...
+          import * as R from "https://deno.land/x/ramda@0.27.1/mod.ts";
+
+          import * as R from "https://x.nest.land/ramda@0.27.1/mod.ts";
+          ...
+          EOL
+      - run: |
+          cat ./version | sed -e "s/https\:\/\/deno.land\/x\/ramda\@[0-9\.]*/https\:\/\/deno.land\/x\/ramda\@${RELEASE_VERSION}/" | tee ./version > /dev/null
+          cat ./version | sed -e "s/https\:\/\/x.nest.land\/ramda\@[0-9\.]*/https\:\/\/x.nest.land\/ramda\@${RELEASE_VERSION}/" | tee ./version > /dev/null
+      - run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit --amend --no-edit
+          git push https://sebastienfilion:${{ secrets.GITHUB_TOKEN }}@github.com/sebastienfilion/sebastienfilion.git HEAD:master --force
+
+
