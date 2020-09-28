@@ -1,0 +1,24 @@
+name: Scratch
+
+on:
+  create:
+  release:
+    types: [published]
+
+jobs:
+  publish-egg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/tags/*}
+      - run: echo ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          echo ${{ env.RELEASE_VERSION }} > version
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit --amend --no-edit
+          git fetch origin master
+          git push https://sebastienfilion:${{ secrets.GITHUB_TOKEN }}@github.com/sebastienfilion.git HEAD:master --force
+
+
