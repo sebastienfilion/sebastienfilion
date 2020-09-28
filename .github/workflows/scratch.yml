@@ -1,0 +1,23 @@
+name: Scratch
+
+on:
+  create:
+  release:
+    types: [published]
+
+jobs:
+  publish-egg:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: echo ::set-env name=RELEASE_VERSION::${GITHUB_REF#refs/tags/*}
+      - run: echo ${ secrets.ssh}
+      - run: |
+          echo ${{ env.RELEASE_VERSION }} > version
+          git remote set-url origin ${{ secrets.ssh }}
+          git add .
+          git commit --amend --no-edit
+          git fetch origin master
+          git push origin HEAD:master --force
+
+
